@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"  
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util" xmlns:jdbc="http://www.springframework.org/schema/jdbc"  
+    xmlns:cache="http://www.springframework.org/schema/cache"  
+    xsi:schemaLocation="  
+    http://www.springframework.org/schema/context  
+    http://www.springframework.org/schema/context/spring-context.xsd  
+    http://www.springframework.org/schema/beans  
+    http://www.springframework.org/schema/beans/spring-beans.xsd  
+    http://www.springframework.org/schema/tx  
+    http://www.springframework.org/schema/tx/spring-tx.xsd  
+    http://www.springframework.org/schema/jdbc  
+    http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd  
+    http://www.springframework.org/schema/cache  
+    http://www.springframework.org/schema/cache/spring-cache-3.1.xsd  
+    http://www.springframework.org/schema/aop  
+    http://www.springframework.org/schema/aop/spring-aop.xsd  
+    http://www.springframework.org/schema/util  
+    http://www.springframework.org/schema/util/spring-util.xsd">  
+    
+    
+    <!-- 引入jedis配置文件   
+    <context:property-placeholder location="classpath:cfg/redis.properties"
+    ignore-unresolvable="true" />
+   
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxTotal">
+        <value>${redis.pool.maxActive}</value>
+        </property>
+        <property name="maxIdle">
+         <value>${redis.pool.maxIdle}</value>
+        </property>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testOnReturn" value="true"/>
+    </bean>
+   
+     <bean id="shardedJedisPool" class="redis.clients.jedis.ShardedJedisPool"  scope="singleton">
+        <constructor-arg index="0" ref="jedisPoolConfig" />
+        <constructor-arg index="1">
+            <list>
+                <bean class="redis.clients.jedis.JedisShardInfo">
+                    <constructor-arg name="host" value="${redis.uri}" />
+                </bean>
+            </list>
+        </constructor-arg>
+    </bean>
+ --> 
+    
+    <!-- 开启自动扫包 -->
+	<context:component-scan base-package="org.wjd.weibo">
+	</context:component-scan>
+	
+	
+	 <!-- POOL配置 -->
+
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+
+        <property name="maxTotal" value="50" />
+
+        <property name="maxIdle" value="10" />
+
+        <property name="maxWaitMillis" value="1000" />
+
+        <property name="testOnBorrow" value="true" />
+
+    </bean>
+
+    <!-- jedis shard信息配置 -->
+
+    <bean id="jedisShardInfo" class="redis.clients.jedis.JedisShardInfo">
+
+        <constructor-arg index="0" value="127.0.0.1" />
+
+        <constructor-arg index="1" value="6379" type="int" />
+
+    </bean>
+
+    <!-- jedis shard pool配置 -->
+
+    <bean id="shardedJedisPool" class="redis.clients.jedis.ShardedJedisPool">
+
+        <constructor-arg index="0" ref="jedisPoolConfig" />
+
+        <constructor-arg index="1">
+
+            <list>
+
+                <ref bean="jedisShardInfo" />
+
+            </list>
+
+        </constructor-arg>
+
+    </bean>
+  
+  
+  <bean id="redisDataSource" class="org.wjd.weibo.redis.utils.RedisDataSourceImpl">  
+        <property name="shardedJedisPool" ref="shardedJedisPool"></property>  
+    </bean>  
+    <bean id="redisClientTemplate" class="org.wjd.weibo.redis.utils.RedisClientTemplate">  
+        <property name="redisDataSource" ref="redisDataSource"></property>  
+    </bean>  
+  
+</beans>  
