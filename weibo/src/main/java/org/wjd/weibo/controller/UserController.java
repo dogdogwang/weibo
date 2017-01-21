@@ -51,6 +51,8 @@ public class UserController {
 		//ShardedJedis jedis = shardedJedisPool.getResource();
 
         String name = redisClientTemplate.get("name");
+        
+        System.out.println(name);
 
         return name;
 	}
